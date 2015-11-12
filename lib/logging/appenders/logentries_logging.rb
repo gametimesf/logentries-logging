@@ -27,6 +27,7 @@ module Logging
         self.levels = Logging::LEVELS.invert
       end
 
+      # SSL socket setup/closing pulled from https://github.com/logentries/le_ruby
       def open_connection
         host = 'api.logentries.com'
         socket = TCPSocket.new(host, 20000)
@@ -72,7 +73,6 @@ module Logging
       end
 
       def close( *args )
-        close_connection
         super(false)
       end
     end

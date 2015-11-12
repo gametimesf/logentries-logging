@@ -1,6 +1,6 @@
 Gem::Specification.new do |s|
   s.name = "logentries-logging"
-  s.version = "0.0.3"
+  s.version = "0.0.4"
 
   s.authors = ["Eric Nicholas"]
   s.require_paths = ["lib"]
