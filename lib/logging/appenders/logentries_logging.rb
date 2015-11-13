@@ -68,11 +68,16 @@ module Logging
         @logentries.write(data)
       rescue TimeoutError, Errno::EHOSTUNREACH, Errno::ECONNREFUSED, Errno::ECONNRESET, Errno::ETIMEDOUT, EOFError
         close_connection
-        open_connection
+        @logentries = open_connection
         @logentries.write(data)
       end
 
+      def reopen
+        @logentries = open_connection
+      end
+
       def close( *args )
+        close_connection
         super(false)
       end
     end
