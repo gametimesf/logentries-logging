@@ -15,14 +15,13 @@ module Logging
     # Provides an appender that can send log messages to loggly
 
     class LogentriesLogging < ::Logging::Appender
-      attr_accessor :token, :logentries, :levels
+      attr_accessor :token, :levels
       def initialize( name, opts = {} )
         opts[:header] = false
         super(name, opts)
         # customer token for logentries
         self.token = opts.fetch(:token)
         raise ArgumentError, 'Must specify token' if @token.nil?
-        self.logentries = open_connection
         self.layout.items = %w(timestamp level logger message pid hostname thread_id mdc)
         self.levels = Logging::LEVELS.invert
       end
@@ -61,19 +60,21 @@ module Logging
         elsif @logentries.respond_to?(:close)
           @logentries.close
         end
+
+        @logentries = nil
+      end
+      alias_method :reopen, :close_connection
+
+      def logentries
+        @logentries ||= open_connection
       end
 
       def write(event)
         data = "#{@token} #{self.layout.format(event)} \n"
-        @logentries.write(data)
-      rescue TimeoutError, Errno::EHOSTUNREACH, Errno::ECONNREFUSED, Errno::ECONNRESET, Errno::ETIMEDOUT, EOFError
+        logentries.write(data)
+      rescue
         close_connection
-        @logentries = open_connection
-        @logentries.write(data)
-      end
-
-      def reopen
-        @logentries = open_connection
+        logentries.write(data)
       end
 
       def close( *args )
